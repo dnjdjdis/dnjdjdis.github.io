@@ -112,3 +112,58 @@ document.getElementById("title").onclick = function () { gallerySort("title"); }
 
 // 처음 열었을 때는 최신순
 gallerySort("newest");
+
+// ---------------- Performance 비교 ----------------
+
+// 비교용: bubble sort (O(n^2))
+function bubbleSort(arr, compare) {
+  const result = arr.slice(); // 원본은 건드리지 않게 복사
+  for (let i = 0; i < result.length - 1; i++) {
+    for (let j = 0; j < result.length - 1 - i; j++) {
+      if (compare(result[j], result[j + 1]) > 0) {
+        const temp = result[j];
+        result[j] = result[j + 1];
+        result[j + 1] = temp;
+      }
+    }
+  }
+  return result;
+}
+
+// 테스트용 가짜 사진 기록 n개 만들기 (날짜는 랜덤)
+function makeFakePhotos(n) {
+  const list = [];
+  for (let k = 0; k < n; k++) {
+    const year = 2020 + Math.floor(Math.random() * 7);
+    const month = 1 + Math.floor(Math.random() * 12);
+    const day = 1 + Math.floor(Math.random() * 28);
+    // 한 자리 숫자는 앞에 0 붙이기 (예: 3 -> "03")
+    const mm = month < 10 ? "0" + month : "" + month;
+    const dd = day < 10 ? "0" + day : "" + day;
+    list.push({ title: "Photo " + k, date: year + "-" + mm + "-" + dd });
+  }
+  return list;
+}
+
+function runPerformance() {
+  const n = 10000;
+  const data = makeFakePhotos(n);
+
+  let start = performance.now();
+  mergeSort(data, byNewest);
+  const mergeTime = (performance.now() - start) / 1000; // 초 단위
+
+  start = performance.now();
+  bubbleSort(data, byNewest);
+  const bubbleTime = (performance.now() - start) / 1000;
+
+  document.getElementById("perfResult").textContent =
+    n + "개 기록 → Merge sort: " + mergeTime.toFixed(3) + "초 vs Bubble sort: " +
+    bubbleTime.toFixed(3) + "초 (약 " + Math.round(bubbleTime / mergeTime) + "배 차이)";
+}
+
+document.getElementById("perf").onclick = function () {
+  document.getElementById("perfResult").textContent = "측정 중...";
+  // 글자가 먼저 화면에 보이도록 조금 있다가 실행
+  setTimeout(runPerformance, 50);
+};
